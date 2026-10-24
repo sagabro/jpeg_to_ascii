@@ -6,6 +6,38 @@
 const char SCALE[] = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
 const int SCALE_LEN = 69;
 
+int Kernel[3][3] = {
+    {0,-1,0},
+    {-1,5,-1},
+    {0,-1,0},
+};
+
+
+int applykernelsharpen(unsigned char* data, int img_width, int img_height, int x, int y, int channel) {
+    int sum = 0;
+
+    for (int k_row = 0; k_row < 3; k_row++) {
+        for (int k_col = 0; k_col < 3; k_col++){
+
+            int neighbor_x = x + (k_col - 1);
+            int neighbor_y = y + (k_row - 1);
+
+            if (neighbor_x < 0) neighbor_x = 0;
+            if (neighbor_y < 0) neighbor_y = 0;
+            if (neighbor_x >= img_width) neighbor_x = img_width - 1;
+            if (neighbor_y >= img_height) neighbor_y = img_height - 1;
+
+            int neighbor_index = (neighbor_y * img_width + neighbor_x) * 3 + channel;
+
+            sum += Kernel[k_col][k_row] * data[neighbor_index];
+        }
+    }
+    if (sum > 255) sum = 255;
+    if (sum < 0) sum = 0;
+
+    return sum;
+}
+
 int main(int argc, char** argv) {
     if (argc < 2) {
         printf("Usage: %s <path_to_jpeg> [target_width]\n", argv[0]);
@@ -38,9 +70,10 @@ int main(int argc, char** argv) {
 
             int pixel_index = (orig_y * img_width + orig_x) * 3;
 
-            unsigned char r = data[pixel_index];
-            unsigned char g = data[pixel_index + 1];
-            unsigned char b = data[pixel_index + 2];
+
+            int r = applykernelsharpen(data, img_width, img_height, orig_x, orig_y, 0);
+            int g = applykernelsharpen(data, img_width, img_height, orig_x, orig_y, 1);
+            int b = applykernelsharpen(data, img_width, img_height, orig_x, orig_y, 2);
 
             int brightness = (int)(0.299 * r + 0.587 * g + 0.114 * b);
 
