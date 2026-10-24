@@ -12,7 +12,6 @@ int Kernel[3][3] = {
     {0,-1,0},
 };
 
-
 int applykernelsharpen(unsigned char* data, int img_width, int img_height, int x, int y, int channel) {
     int sum = 0;
 
@@ -67,9 +66,6 @@ int main(int argc, char** argv) {
 
             int orig_x = (int)((double)x / target_width * img_width);
             int orig_y = (int)((double)y / target_height * img_height);
-
-            int pixel_index = (orig_y * img_width + orig_x) * 3;
-
 
             int r = applykernelsharpen(data, img_width, img_height, orig_x, orig_y, 0);
             int g = applykernelsharpen(data, img_width, img_height, orig_x, orig_y, 1);
